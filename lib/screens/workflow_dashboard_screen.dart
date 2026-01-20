@@ -8,6 +8,10 @@ import 'task_detail_sheet.dart';
 
 import '../widgets/glass_card.dart';
 
+import 'settings_screen.dart';
+
+import 'create_task_screen.dart';
+
 class WorkflowDashboardScreen extends StatelessWidget {
   const WorkflowDashboardScreen({super.key});
 
@@ -40,171 +44,239 @@ class WorkflowDashboardScreen extends StatelessWidget {
           ),
 
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Welcome Section
-                  Text(
-                    'Welcome back.',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.titanium,
-                      letterSpacing: -1,
-                    ),
-                  ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0),
-                  
-                  const SizedBox(height: 12),
-                  
-                  Row(
+            child: Column(
+              children: [
+                // New Header with Profile
+                GlassCard(
+                  borderRadius: BorderRadius.zero,
+                  opacity: 0.8,
+                  border: const Border(bottom: BorderSide(color: AppColors.borderSubtle)),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        dateStr,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.gunmetal,
-                          letterSpacing: 1,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'ORCHESTRATOR',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.electric,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Workflows',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.titanium,
+                              height: 1.1,
+                            ),
+                          ),
+                        ],
                       ),
-                      Container(
-                        height: 16,
-                        width: 1,
-                        color: AppColors.borderSubtle,
-                        margin: const EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          style: GoogleFonts.inter(fontSize: 12, color: AppColors.gunmetal),
-                          children: [
-                            const TextSpan(text: 'Today is '),
-                            TextSpan(
-                              text: '80% executed',
-                              style: TextStyle(
-                                color: AppColors.electric,
-                                fontWeight: FontWeight.w900,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                          );
+                        },
+                        child: Container(
+                          width: 40, height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.electric,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.voidBg, width: 2),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'U',
+                              style: GoogleFonts.spaceGrotesk(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.voidBg,
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
-                  ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
-
-                  const SizedBox(height: 32),
-
-                  // Stats Grid
-                  SizedBox(
-                    height: 140,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      clipBehavior: Clip.none,
-                      children: [
-                        _buildStatCard(
-                          title: 'ACTIVE FLOWS',
-                          value: '12',
-                          subtitle: '4 running now',
-                          icon: LucideIcons.activity,
-                          color: AppColors.electric,
-                          delay: 0,
-                        ),
-                        const SizedBox(width: 16),
-                        _buildStatCard(
-                          title: 'TASKS PENDING',
-                          value: '08',
-                          subtitle: '3 high priority',
-                          icon: LucideIcons.checkCircle,
-                          color: const Color(0xFF10B981),
-                          delay: 100,
-                        ),
-                        const SizedBox(width: 16),
-                        _buildStatCard(
-                          title: 'TIME SAVED',
-                          value: '4.2h',
-                          subtitle: 'This week',
-                          icon: LucideIcons.zap,
-                          color: Colors.orangeAccent,
-                          delay: 200,
-                        ),
-                      ],
-                    ),
                   ),
+                ),
 
-                  const SizedBox(height: 48),
-
-                  // Critical Objectives
-                  _buildSectionHeader('CRITICAL TRACK', LucideIcons.target, const Color(0xFFFF4D4D)),
-                  const SizedBox(height: 16),
-                  _buildTaskItem(
-                    title: 'Sync Note Attachments',
-                    tag: 'SYSTEM',
-                    tagColor: AppColors.electric,
-                    time: 'Active',
-                  ),
-                  _buildTaskItem(
-                    title: 'Keep Vault Audit',
-                    tag: 'SECURITY',
-                    tagColor: const Color(0xFFFF4D4D),
-                    time: 'Scheduled',
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Metrics
-                  GlassCard(
-                    opacity: 0.4,
+                Expanded(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Welcome Section (Moved inside ScrollView)
                         Text(
-                          'SYSTEM PERFORMANCE',
+                          'Welcome back.',
                           style: GoogleFonts.spaceGrotesk(
-                            fontSize: 10,
+                            fontSize: 32,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.gunmetal,
-                            letterSpacing: 2,
+                            color: AppColors.titanium,
+                            letterSpacing: -1,
                           ),
-                        ),
-                        const SizedBox(height: 24),
+                        ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0),
+                        
+                        const SizedBox(height: 12),
+                        
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'AUTOMATION QUOTA',
+                              dateStr,
                               style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.titanium,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.gunmetal,
+                                letterSpacing: 1,
                               ),
                             ),
-                            Text(
-                              '94%',
-                              style: GoogleFonts.spaceMono(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.electric,
+                            Container(
+                              height: 16,
+                              width: 1,
+                              color: AppColors.borderSubtle,
+                              margin: const EdgeInsets.symmetric(horizontal: 12),
+                            ),
+                            RichText(
+                              text: TextSpan(
+                                style: GoogleFonts.inter(fontSize: 12, color: AppColors.gunmetal),
+                                children: [
+                                  const TextSpan(text: 'Today is '),
+                                  TextSpan(
+                                    text: '80% executed',
+                                    style: TextStyle(
+                                      color: AppColors.electric,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: const LinearProgressIndicator(
-                            value: 0.94,
-                            minHeight: 6,
-                            backgroundColor: AppColors.surface2,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.electric),
+                        ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+
+                        const SizedBox(height: 32),
+
+                        // Stats Grid
+                        SizedBox(
+                          height: 140,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            clipBehavior: Clip.none,
+                            children: [
+                              _buildStatCard(
+                                title: 'ACTIVE FLOWS',
+                                value: '12',
+                                subtitle: '4 running now',
+                                icon: LucideIcons.activity,
+                                color: AppColors.electric,
+                                delay: 0,
+                              ),
+                              const SizedBox(width: 16),
+                              _buildStatCard(
+                                title: 'TASKS PENDING',
+                                value: '08',
+                                subtitle: '3 high priority',
+                                icon: LucideIcons.checkCircle,
+                                color: const Color(0xFF10B981),
+                                delay: 100,
+                              ),
+                              const SizedBox(width: 16),
+                              _buildStatCard(
+                                title: 'TIME SAVED',
+                                value: '4.2h',
+                                subtitle: 'This week',
+                                icon: LucideIcons.zap,
+                                color: Colors.orangeAccent,
+                                delay: 200,
+                              ),
+                            ],
                           ),
                         ),
+
+                        const SizedBox(height: 48),
+
+                        // Critical Objectives
+                        _buildSectionHeader('CRITICAL TRACK', LucideIcons.target, const Color(0xFFFF4D4D)),
+                        const SizedBox(height: 16),
+                        _buildTaskItem(
+                          title: 'Sync Note Attachments',
+                          tag: 'SYSTEM',
+                          tagColor: AppColors.electric,
+                          time: 'Active',
+                        ),
+                        _buildTaskItem(
+                          title: 'Keep Vault Audit',
+                          tag: 'SECURITY',
+                          tagColor: const Color(0xFFFF4D4D),
+                          time: 'Scheduled',
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // Metrics
+                        GlassCard(
+                          opacity: 0.4,
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'SYSTEM PERFORMANCE',
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.gunmetal,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'AUTOMATION QUOTA',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.titanium,
+                                    ),
+                                  ),
+                                  Text(
+                                    '94%',
+                                    style: GoogleFonts.spaceMono(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.electric,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: const LinearProgressIndicator(
+                                  value: 0.94,
+                                  minHeight: 6,
+                                  backgroundColor: AppColors.surface2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.electric),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ).animate().fadeIn(duration: 600.ms, delay: 400.ms).slideY(begin: 0.1, end: 0),
                       ],
                     ),
-                  ).animate().fadeIn(duration: 600.ms, delay: 400.ms).slideY(begin: 0.1, end: 0),
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -223,7 +295,12 @@ class WorkflowDashboardScreen extends StatelessWidget {
           ],
         ),
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CreateTaskScreen()),
+            );
+          },
           backgroundColor: Colors.transparent,
           elevation: 0,
           highlightElevation: 0,
