@@ -9,8 +9,8 @@ import 'task_detail_sheet.dart';
 import '../widgets/glass_card.dart';
 
 import 'settings_screen.dart';
-
 import 'create_task_screen.dart';
+import '../core/theme/glass_route.dart';
 
 class WorkflowDashboardScreen extends StatelessWidget {
   const WorkflowDashboardScreen({super.key});
@@ -83,7 +83,7 @@ class WorkflowDashboardScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                            GlassRoute(page: const SettingsScreen()),
                           );
                         },
                         child: Container(
@@ -298,7 +298,7 @@ class WorkflowDashboardScreen extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const CreateTaskScreen()),
+              GlassRoute(page: const CreateTaskScreen()),
             );
           },
           backgroundColor: Colors.transparent,
