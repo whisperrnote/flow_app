@@ -65,6 +65,19 @@ class WorkflowService {
     }
   }
 
+  Future<void> updateTaskStatus(String taskId, String status) async {
+    try {
+      await _databases.updateDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.tasksCollectionId,
+        documentId: taskId,
+        data: {'status': status},
+      );
+    } catch (e) {
+      throw Exception('Failed to update task status: $e');
+    }
+  }
+
   // Calendars
   Future<List<Calendar>> listCalendars(String userId) async {
     try {
