@@ -9,6 +9,8 @@ import '../core/services/workflow_service.dart';
 import '../core/models/calendar_model.dart';
 import '../core/models/event_model.dart';
 import '../widgets/glass_card.dart';
+import 'create_event_screen.dart';
+import '../core/theme/glass_route.dart';
 import 'package:intl/intl.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -71,6 +73,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
           icon: const Icon(LucideIcons.chevronLeft, color: AppColors.titanium),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.plus, color: AppColors.electric),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                GlassRoute(page: const CreateEventScreen()),
+              );
+              _fetchData();
+            },
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(
