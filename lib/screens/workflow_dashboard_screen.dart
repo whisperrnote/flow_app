@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+import '../widgets/whisperr_shimmer.dart';
 import '../core/theme/colors.dart';
 import 'package:intl/intl.dart';
 import 'task_detail_sheet.dart';
@@ -396,7 +397,7 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
                                       ),
                                       const SizedBox(width: 32),
                                       Expanded(
-                                        child: _buildSystemPerformance(),
+              child: _buildSystemPerformance(),
                                       ),
                                     ],
                                   )
