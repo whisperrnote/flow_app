@@ -2,10 +2,14 @@ import 'package:appwrite/appwrite.dart';
 import '../constants/appwrite_constants.dart';
 import 'appwrite_service.dart';
 import '../models/task_model.dart';
+import '../models/calendar_model.dart';
+import '../models/event_model.dart';
+import '../models/focus_session_model.dart';
 
 class WorkflowService {
   final Databases _databases = AppwriteService().databases;
 
+  // Tasks
   Future<List<Task>> listTasks(String userId) async {
     try {
       final response = await _databases.listDocuments(
@@ -29,6 +33,9 @@ class WorkflowService {
     required String status,
     required String priority,
     DateTime? dueDate,
+    String? recurrenceRule,
+    List<String>? tags,
+    String? parentId,
   }) async {
     try {
       final doc = await _databases.createDocument(
@@ -41,9 +48,10 @@ class WorkflowService {
           'status': status,
           'priority': priority,
           'dueDate': dueDate?.toIso8601String(),
+          'recurrenceRule': recurrenceRule,
+          'tags': tags,
           'userId': userId,
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
+          'parentId': parentId,
         },
         permissions: [
           Permission.read(Role.user(userId)),
@@ -57,28 +65,78 @@ class WorkflowService {
     }
   }
 
-  Future<void> updateTaskStatus(String taskId, String status) async {
+  // Calendars
+  Future<List<Calendar>> listCalendars(String userId) async {
     try {
-      await _databases.updateDocument(
+      final response = await _databases.listDocuments(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.tasksCollectionId,
-        documentId: taskId,
-        data: {'status': status, 'updatedAt': DateTime.now().toIso8601String()},
+        collectionId: AppwriteConstants.calendarsCollectionId,
+        queries: [Query.equal('userId', userId)],
       );
+      return response.documents
+          .map((doc) => Calendar.fromJson(doc.data))
+          .toList();
     } catch (e) {
-      throw Exception('Failed to update task status: $e');
+      throw Exception('Failed to list calendars: $e');
     }
   }
 
-  Future<void> deleteTask(String taskId) async {
+  // Events
+  Future<List<Event>> listEvents(String userId) async {
     try {
-      await _databases.deleteDocument(
+      final response = await _databases.listDocuments(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.tasksCollectionId,
-        documentId: taskId,
+        collectionId: AppwriteConstants.eventsCollectionId,
+        queries: [Query.equal('userId', userId)],
+      );
+      return response.documents.map((doc) => Event.fromJson(doc.data)).toList();
+    } catch (e) {
+      throw Exception('Failed to list events: $e');
+    }
+  }
+
+  // Focus Sessions
+  Future<FocusSession> startFocusSession({
+    required String userId,
+    required String taskId,
+    required int duration,
+  }) async {
+    try {
+      final doc = await _databases.createDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.focusSessionsCollectionId,
+        documentId: ID.unique(),
+        data: {
+          'userId': userId,
+          'taskId': taskId,
+          'startTime': DateTime.now().toIso8601String(),
+          'duration': duration,
+          'status': 'active',
+        },
+        permissions: [
+          Permission.read(Role.user(userId)),
+          Permission.update(Role.user(userId)),
+        ],
+      );
+      return FocusSession.fromJson(doc.data);
+    } catch (e) {
+      throw Exception('Failed to start focus session: $e');
+    }
+  }
+
+  Future<void> endFocusSession(String sessionId) async {
+    try {
+      await _databases.updateDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.focusSessionsCollectionId,
+        documentId: sessionId,
+        data: {
+          'endTime': DateTime.now().toIso8601String(),
+          'status': 'completed',
+        },
       );
     } catch (e) {
-      throw Exception('Failed to delete task: $e');
+      throw Exception('Failed to end focus session: $e');
     }
   }
 }

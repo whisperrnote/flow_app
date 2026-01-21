@@ -5,8 +5,11 @@ class AppwriteConstants {
 
   // Collections
   static const String usersCollectionId = '67ff05c900247b5673d3';
-  static const String tasksCollectionId =
-      '67ff05f3002502ef239e'; // Linked to Tasks in Flow
+  static const String tasksCollectionId = '67ff05f3002502ef239e';
+  static const String calendarsCollectionId = 'calendars';
+  static const String eventsCollectionId = 'events';
+  static const String eventGuestsCollectionId = 'eventGuests';
+  static const String focusSessionsCollectionId = 'focusSessions';
   static const String tagsCollectionId = '67ff06280034908cf08a';
   static const String workflowsCollectionId = 'workflows';
   static const String taskHistoryCollectionId = 'taskHistory';
@@ -16,5 +19,6 @@ class AppwriteConstants {
 
   // Buckets
   static const String profilePicturesBucketId = 'profile_pictures';
-  static const String notesAttachmentsBucketId = 'notes_attachments';
+  static const String taskAttachmentsBucketId = 'task_attachments';
+  static const String eventCoversBucketId = 'event_covers';
 }
