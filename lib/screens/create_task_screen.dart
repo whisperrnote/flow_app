@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import '../core/theme/colors.dart';
 import '../widgets/glass_card.dart';
+import '../core/services/workflow_service.dart';
+import '../core/providers/auth_provider.dart';
 
 class CreateTaskScreen extends StatefulWidget {
   const CreateTaskScreen({super.key});
@@ -15,8 +18,39 @@ class CreateTaskScreen extends StatefulWidget {
 class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
+  final WorkflowService _workflowService = WorkflowService();
   String _priority = 'NORMAL'; // 'LOW', 'NORMAL', 'HIGH', 'CRITICAL'
   DateTime _dueDate = DateTime.now();
+  bool _isSaving = false;
+
+  Future<void> _handleSave() async {
+    if (_titleController.text.isEmpty) return;
+
+    setState(() => _isSaving = true);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    try {
+      if (authProvider.user != null) {
+        await _workflowService.createTask(
+          userId: authProvider.user!.$id,
+          title: _titleController.text,
+          description: _descController.text,
+          status: 'pending',
+          priority: _priority.toLowerCase(),
+          dueDate: _dueDate,
+        );
+        if (mounted) Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to initiate flow: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +65,21 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                 GlassCard(
                   borderRadius: BorderRadius.zero,
                   opacity: 0.8,
-                  border: const Border(bottom: BorderSide(color: AppColors.borderSubtle)),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: const Border(
+                    bottom: BorderSide(color: AppColors.borderSubtle),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(LucideIcons.arrowLeft, color: AppColors.gunmetal, size: 20),
+                        icon: const Icon(
+                          LucideIcons.arrowLeft,
+                          color: AppColors.gunmetal,
+                          size: 20,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 8),
@@ -67,7 +110,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         ),
                         decoration: InputDecoration(
                           hintText: 'What is the goal?',
-                          hintStyle: GoogleFonts.spaceGrotesk(color: AppColors.gunmetal.withOpacity(0.3)),
+                          hintStyle: GoogleFonts.spaceGrotesk(
+                            color: AppColors.gunmetal.withOpacity(0.3),
+                          ),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
@@ -100,7 +145,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             context: context,
                             initialDate: _dueDate,
                             firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365),
+                            ),
                           );
                           if (date != null) setState(() => _dueDate = date);
                         },
@@ -109,14 +156,25 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           padding: const EdgeInsets.all(16),
                           child: Row(
                             children: [
-                              const Icon(LucideIcons.calendar, size: 18, color: AppColors.electric),
+                              const Icon(
+                                LucideIcons.calendar,
+                                size: 18,
+                                color: AppColors.electric,
+                              ),
                               const SizedBox(width: 16),
                               Text(
                                 'Due ${_dueDate.day}/${_dueDate.month}/${_dueDate.year}',
-                                style: GoogleFonts.inter(color: AppColors.titanium, fontWeight: FontWeight.w600),
+                                style: GoogleFonts.inter(
+                                  color: AppColors.titanium,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               const Spacer(),
-                              const Icon(LucideIcons.chevronDown, size: 16, color: AppColors.gunmetal),
+                              const Icon(
+                                LucideIcons.chevronDown,
+                                size: 16,
+                                color: AppColors.gunmetal,
+                              ),
                             ],
                           ),
                         ),
@@ -129,42 +187,57 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       TextField(
                         controller: _descController,
                         maxLines: 5,
-                        style: GoogleFonts.inter(color: AppColors.titanium, height: 1.5),
+                        style: GoogleFonts.inter(
+                          color: AppColors.titanium,
+                          height: 1.5,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Describe the outcome...',
-                          hintStyle: GoogleFonts.inter(color: AppColors.gunmetal.withOpacity(0.5)),
+                          hintStyle: GoogleFonts.inter(
+                            color: AppColors.gunmetal.withOpacity(0.5),
+                          ),
                           filled: true,
                           fillColor: AppColors.surface2.withOpacity(0.5),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppColors.borderSubtle),
+                            borderSide: const BorderSide(
+                              color: AppColors.borderSubtle,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppColors.borderSubtle),
+                            borderSide: const BorderSide(
+                              color: AppColors.borderSubtle,
+                            ),
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 48),
-                      
+
                       SizedBox(
                         width: double.infinity,
                         height: 60,
                         child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: _isSaving ? null : _handleSave,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.electric,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                          child: Text(
-                            'INITIATE FLOW',
-                            style: GoogleFonts.spaceGrotesk(
-                              color: AppColors.voidBg,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
+                          child: _isSaving
+                              ? const CircularProgressIndicator(
+                                  color: AppColors.voidBg,
+                                )
+                              : Text(
+                                  'INITIATE FLOW',
+                                  style: GoogleFonts.spaceGrotesk(
+                                    color: AppColors.voidBg,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
@@ -200,7 +273,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         decoration: BoxDecoration(
           color: isSelected ? color.withOpacity(0.2) : AppColors.surface2,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isSelected ? color : AppColors.borderSubtle),
+          border: Border.all(
+            color: isSelected ? color : AppColors.borderSubtle,
+          ),
         ),
         child: Text(
           label,
