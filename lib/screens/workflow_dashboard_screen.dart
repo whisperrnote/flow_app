@@ -13,6 +13,8 @@ import '../core/models/task_model.dart';
 import '../widgets/glass_card.dart';
 import 'settings_screen.dart';
 import 'create_task_screen.dart';
+import 'calendar_screen.dart';
+import 'focus_screen.dart';
 import '../core/theme/glass_route.dart';
 
 class WorkflowDashboardScreen extends StatefulWidget {
@@ -305,18 +307,23 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
                                     icon: LucideIcons.activity,
                                     color: AppColors.electric,
                                     delay: 0,
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      GlassRoute(page: const FocusScreen()),
+                                    ),
                                   ),
                                   const SizedBox(width: 16),
                                   _buildStatCard(
-                                    title: 'TASKS PENDING',
-                                    value: _tasks
-                                        .where((t) => t.status == 'pending')
-                                        .length
-                                        .toString(),
-                                    subtitle: '3 high priority',
-                                    icon: LucideIcons.checkCircle,
+                                    title: 'CALENDAR',
+                                    value: 'VIEW',
+                                    subtitle: 'Schedule',
+                                    icon: LucideIcons.calendar,
                                     color: const Color(0xFF10B981),
                                     delay: 100,
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      GlassRoute(page: const CalendarScreen()),
+                                    ),
                                   ),
                                   const SizedBox(width: 16),
                                   _buildStatCard(
@@ -397,7 +404,7 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
                                       ),
                                       const SizedBox(width: 32),
                                       Expanded(
-              child: _buildSystemPerformance(),
+                                        child: _buildSystemPerformance(),
                                       ),
                                     ],
                                   )
@@ -537,51 +544,56 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
     required IconData icon,
     required Color color,
     required int delay,
+    VoidCallback? onTap,
   }) {
-    return GlassCard(
-          opacity: 0.3,
-          padding: const EdgeInsets.all(20),
-          child: SizedBox(
-            width: 140,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Icon(icon, size: 16, color: color)],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      value,
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.titanium,
-                        height: 1,
+    return GestureDetector(
+      onTap: onTap,
+      child:
+          GlassCard(
+                opacity: 0.3,
+                padding: const EdgeInsets.all(20),
+                child: SizedBox(
+                  width: 140,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [Icon(icon, size: 16, color: color)],
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      title,
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.gunmetal,
-                        letterSpacing: 1,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            value,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.titanium,
+                              height: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            title,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.gunmetal,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-        )
-        .animate()
-        .fadeIn(duration: 600.ms, delay: delay.ms)
-        .slideX(begin: 0.1, end: 0);
+              )
+              .animate()
+              .fadeIn(duration: 600.ms, delay: delay.ms)
+              .slideX(begin: 0.1, end: 0),
+    );
   }
 
   Widget _buildSectionHeader(String title, IconData icon, Color color) {
