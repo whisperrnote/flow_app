@@ -22,6 +22,7 @@ class WorkflowService {
           priority: 'high',
           userId: userId,
           createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         ),
       ];
     }
@@ -116,10 +117,14 @@ class WorkflowService {
           id: '1',
           calendarId: 'default',
           title: 'Mock Meeting',
+          description: 'A mock meeting description.',
+          visibility: 'public',
+          status: 'confirmed',
           startTime: DateTime.now().add(const Duration(hours: 2)),
           endTime: DateTime.now().add(const Duration(hours: 3)),
           userId: userId,
           createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         ),
       ];
     }
