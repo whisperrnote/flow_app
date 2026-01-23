@@ -5,12 +5,26 @@ import '../models/task_model.dart';
 import '../models/calendar_model.dart';
 import '../models/event_model.dart';
 import '../models/focus_session_model.dart';
+import '../constants/app_constants.dart';
 
 class WorkflowService {
   final Databases _databases = AppwriteService().databases;
 
   // Tasks
   Future<List<Task>> listTasks(String userId) async {
+    if (AppConstants.useMockMode) {
+      return [
+        Task(
+          id: '1',
+          title: 'Complete Project Documentation',
+          description: 'Write up all the docs.',
+          status: 'pending',
+          priority: 'high',
+          userId: userId,
+          createdAt: DateTime.now(),
+        ),
+      ];
+    }
     try {
       final response = await _databases.listDocuments(
         databaseId: AppwriteConstants.databaseId,
@@ -96,6 +110,19 @@ class WorkflowService {
 
   // Events
   Future<List<Event>> listEvents(String userId) async {
+    if (AppConstants.useMockMode) {
+      return [
+        Event(
+          id: '1',
+          calendarId: 'default',
+          title: 'Mock Meeting',
+          startTime: DateTime.now().add(const Duration(hours: 2)),
+          endTime: DateTime.now().add(const Duration(hours: 3)),
+          userId: userId,
+          createdAt: DateTime.now(),
+        ),
+      ];
+    }
     try {
       final response = await _databases.listDocuments(
         databaseId: AppwriteConstants.databaseId,
