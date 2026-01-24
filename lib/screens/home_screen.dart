@@ -1,147 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import '../core/theme/colors.dart';
 import '../widgets/responsive_layout.dart';
+import '../widgets/bottom_nav.dart';
+import '../widgets/app_bar.dart';
+import '../widgets/sidebar.dart';
 import 'workflow_dashboard_screen.dart';
+import 'task_list_screen.dart';
+import 'calendar_screen.dart';
+import 'focus_screen.dart';
 import 'settings_screen.dart';
+import 'create_task_screen.dart';
 import '../core/theme/glass_route.dart';
+import '../core/providers/auth_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final List<Widget> _screens = [
+    const WorkflowDashboardScreen(),
+    const TaskListScreen(),
+    const FocusScreen(),
+    const CalendarScreen(),
+  ];
+
+  @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final userInitials = authProvider.user?.name.substring(0, 1).toUpperCase() ?? 'U';
+
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: AppColors.voidBg,
+      drawer: ResponsiveLayout.isDesktop(context) 
+        ? null 
+        : Drawer(
+            width: 280,
+            backgroundColor: AppColors.voidBg,
+            child: FlowSidebar(
+              selectedIndex: _selectedIndex,
+              onTap: (index) {
+                setState(() => _selectedIndex = index);
+                Navigator.pop(context);
+              },
+            ),
+          ),
       body: ResponsiveLayout(
-        mobile: const WorkflowDashboardScreen(),
-        desktop: _DesktopFlow(),
-      ),
-    );
-  }
-}
-
-class _DesktopFlow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _DesktopSidebar(),
-        const VerticalDivider(width: 1, color: AppColors.borderSubtle),
-        const Expanded(child: WorkflowDashboardScreen(isDesktop: true)),
-      ],
-    );
-  }
-}
-
-class _DesktopSidebar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 260,
-      color: AppColors.voidBg,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Row(
+        mobile: Stack(
+          children: [
+            Column(
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface2,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.borderSubtle),
-                  ),
-                  child: const Icon(
-                    LucideIcons.zap,
-                    color: AppColors.electric,
-                    size: 16,
-                  ),
+                FlowAppBar(
+                  onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
+                  userInitials: userInitials,
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  'WhisperrFlow',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: AppColors.titanium,
+                Expanded(
+                  child: IndexedStack(
+                    index: _selectedIndex,
+                    children: _screens,
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 8),
-          _SidebarItem(
-            icon: LucideIcons.layout,
-            label: 'Dashboard',
-            isActive: true,
-          ),
-          _SidebarItem(icon: LucideIcons.calendar, label: 'Calendar'),
-          _SidebarItem(icon: LucideIcons.list, label: 'Tasks'),
-          _SidebarItem(icon: LucideIcons.activity, label: 'Analytics'),
-          const Spacer(),
-          _SidebarItem(
-            icon: LucideIcons.settings,
-            label: 'Settings',
-            onTap: () => Navigator.push(
-              context,
-              GlassRoute(page: const SettingsScreen()),
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-}
-
-class _SidebarItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final VoidCallback? onTap;
-
-  const _SidebarItem({
-    required this.icon,
-    required this.label,
-    this.isActive = false,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: isActive ? AppColors.electric : AppColors.gunmetal,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  color: isActive ? AppColors.titanium : AppColors.gunmetal,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  fontSize: 14,
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: FlowBottomNav(
+                currentIndex: _selectedIndex,
+                onTap: (index) => setState(() => _selectedIndex = index),
+                onAddTap: () => Navigator.push(
+                  context,
+                  GlassRoute(page: const CreateTaskScreen()),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
+        desktop: Row(
+          children: [
+            FlowSidebar(
+              selectedIndex: _selectedIndex,
+              onTap: (index) => setState(() => _selectedIndex = index),
+            ),
+            const VerticalDivider(width: 1, color: AppColors.borderSubtle),
+            Expanded(
+              child: Column(
+                children: [
+                  FlowAppBar(
+                    onMenuTap: () {},
+                    userInitials: userInitials,
+                  ),
+                  Expanded(
+                    child: IndexedStack(
+                      index: _selectedIndex,
+                      children: _screens.map((s) {
+                        if (s is WorkflowDashboardScreen) {
+                          return const WorkflowDashboardScreen(isDesktop: true);
+                        }
+                        return s;
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

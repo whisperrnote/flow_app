@@ -81,167 +81,76 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
             ),
           ),
 
-          SafeArea(
-            child: Column(
-              children: [
-                // Header with Profile
-                GlassCard(
-                  borderRadius: BorderRadius.zero,
-                  opacity: 0.8,
-                  border: const Border(
-                    bottom: BorderSide(color: AppColors.borderSubtle),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          RefreshIndicator(
+            onRefresh: _fetchTasks,
+            color: AppColors.electric,
+            backgroundColor: AppColors.surface,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+                  // Welcome Section
+                  Text(
+                        'Welcome back, ${authProvider.user?.name.split(' ')[0] ?? ''}.',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: widget.isDesktop ? 48 : 32,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.titanium,
+                          letterSpacing: -1,
+                        ),
+                      )
+                      .animate()
+                      .fadeIn(duration: 600.ms)
+                      .slideY(begin: -0.2, end: 0),
+
+                  const SizedBox(height: 12),
+
+                  Row(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'ORCHESTRATOR',
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.electric,
-                              letterSpacing: 2,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Workflows',
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.titanium,
-                              height: 1.1,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        dateStr,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.gunmetal,
+                          letterSpacing: 1,
+                        ),
                       ),
-                      Row(
-                        children: [
-                          if (widget.isDesktop) ...[
-                            _DesktopHeaderAction(LucideIcons.plus, () async {
-                              await Navigator.push(
-                                context,
-                                GlassRoute(page: const CreateTaskScreen()),
-                              );
-                              _fetchTasks();
-                            }, isPrimary: true),
-                            const SizedBox(width: 8),
-                          ],
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                GlassRoute(page: const SettingsScreen()),
-                              );
-                            },
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
+                      Container(
+                        height: 16,
+                        width: 1,
+                        color: AppColors.borderSubtle,
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                        ),
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.gunmetal,
+                          ),
+                          children: [
+                            const TextSpan(text: 'Today is '),
+                            TextSpan(
+                              text: _tasks.isEmpty
+                                  ? '0% executed'
+                                  : '${((_tasks.where((t) => t.status == 'completed').length / _tasks.length) * 100).toInt()}% executed',
+                              style: TextStyle(
                                 color: AppColors.electric,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: AppColors.voidBg,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  authProvider.user?.name
-                                          .substring(0, 1)
-                                          .toUpperCase() ??
-                                      'U',
-                                  style: GoogleFonts.spaceGrotesk(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.voidBg,
-                                  ),
-                                ),
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
-                  ),
-                ),
+                  ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
 
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: _fetchTasks,
-                    color: AppColors.electric,
-                    backgroundColor: AppColors.surface,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Welcome Section
-                          Text(
-                                'Welcome back, ${authProvider.user?.name.split(' ')[0] ?? ''}.',
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontSize: widget.isDesktop ? 48 : 32,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.titanium,
-                                  letterSpacing: -1,
-                                ),
-                              )
-                              .animate()
-                              .fadeIn(duration: 600.ms)
-                              .slideY(begin: -0.2, end: 0),
-
-                          const SizedBox(height: 12),
-
-                          Row(
-                            children: [
-                              Text(
-                                dateStr,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.gunmetal,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                              Container(
-                                height: 16,
-                                width: 1,
-                                color: AppColors.borderSubtle,
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                              ),
-                              RichText(
-                                text: TextSpan(
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    color: AppColors.gunmetal,
-                                  ),
-                                  children: [
-                                    const TextSpan(text: 'Today is '),
-                                    TextSpan(
-                                      text: _tasks.isEmpty
-                                          ? '0% executed'
-                                          : '${((_tasks.where((t) => t.status == 'completed').length / _tasks.length) * 100).toInt()}% executed',
-                                      style: TextStyle(
-                                        color: AppColors.electric,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
-
-                          const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
                           // Stats Row/Grid
                           if (widget.isDesktop)
