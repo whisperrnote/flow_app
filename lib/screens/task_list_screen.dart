@@ -8,6 +8,7 @@ import '../widgets/glass_card.dart';
 import '../core/providers/auth_provider.dart';
 import '../core/services/workflow_service.dart';
 import '../core/models/task_model.dart';
+import 'task_detail_sheet.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -189,12 +190,25 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Widget _buildTaskItem(Task task) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: GlassCard(
-        opacity: 0.3,
-        padding: const EdgeInsets.all(16),
-        borderRadius: BorderRadius.circular(20),
-        child: Row(
-          children: [
+      child: GestureDetector(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => TaskDetailSheet(
+              title: task.title,
+              tag: task.priority.toUpperCase(),
+              tagColor: task.priority == 'high' ? Colors.redAccent : AppColors.electric,
+            ),
+          );
+        },
+        child: GlassCard(
+          opacity: 0.3,
+          padding: const EdgeInsets.all(16),
+          borderRadius: BorderRadius.circular(20),
+          child: Row(
+            children: [
             Container(
               width: 24,
               height: 24,

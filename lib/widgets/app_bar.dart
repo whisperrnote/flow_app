@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/theme/colors.dart';
 import 'logo.dart';
 import 'glass_card.dart';
+import 'ai_command_modal.dart';
+import 'ecosystem_portal.dart';
 
 class FlowAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onMenuTap;
@@ -61,7 +63,25 @@ class FlowAppBar extends StatelessWidget implements PreferredSizeWidget {
             _HeaderIconButton(
               icon: LucideIcons.sparkles,
               color: AppColors.electric,
-              onTap: () {},
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const AICommandModal(),
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+            _HeaderIconButton(
+              icon: LucideIcons.layoutGrid,
+              color: AppColors.electric,
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const EcosystemPortal(),
+                );
+              },
             ),
             const SizedBox(width: 8),
             _HeaderIconButton(

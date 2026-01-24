@@ -42,12 +42,14 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
     if (authProvider.user != null) {
       try {
         final tasks = await _workflowService.listTasks(authProvider.user!.$id);
-        setState(() {
-          _tasks = tasks;
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _tasks = tasks;
+            _isLoading = false;
+          });
+        }
       } catch (e) {
-        setState(() => _isLoading = false);
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
@@ -58,266 +60,236 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
     final dateStr = DateFormat('EEEE, MMMM d, yyyy').format(now).toUpperCase();
     final authProvider = Provider.of<AuthProvider>(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.voidBg,
-      body: Stack(
-        children: [
-          // Background Gradient
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 350,
-              height: 350,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.electric.withOpacity(0.08),
-                    Colors.transparent,
-                  ],
-                ),
+    return Stack(
+      children: [
+        // Background Gradient
+        Positioned(
+          top: -100,
+          right: -100,
+          child: Container(
+            width: 350,
+            height: 350,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  AppColors.electric.withOpacity(0.08),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
+        ),
 
-          RefreshIndicator(
-            onRefresh: _fetchTasks,
-            color: AppColors.electric,
-            backgroundColor: AppColors.surface,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 12),
-                  // Welcome Section
-                  Text(
-                        'Welcome back, ${authProvider.user?.name.split(' ')[0] ?? ''}.',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: widget.isDesktop ? 48 : 32,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.titanium,
-                          letterSpacing: -1,
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(duration: 600.ms)
-                      .slideY(begin: -0.2, end: 0),
+        RefreshIndicator(
+          onRefresh: _fetchTasks,
+          color: AppColors.electric,
+          backgroundColor: AppColors.surface,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                // Welcome Section
+                Text(
+                      'Welcome back, ${authProvider.user?.name.split(' ')[0] ?? ''}.',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: widget.isDesktop ? 48 : 32,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.titanium,
+                        letterSpacing: -1,
+                      ),
+                    )
+                    .animate()
+                    .fadeIn(duration: 600.ms)
+                    .slideY(begin: -0.2, end: 0),
 
-                  const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
-                  Row(
-                    children: [
-                      Text(
-                        dateStr,
+                Row(
+                  children: [
+                    Text(
+                      dateStr,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.gunmetal,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    Container(
+                      height: 16,
+                      width: 1,
+                      color: AppColors.borderSubtle,
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                    ),
+                    RichText(
+                      text: TextSpan(
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
                           color: AppColors.gunmetal,
-                          letterSpacing: 1,
                         ),
-                      ),
-                      Container(
-                        height: 16,
-                        width: 1,
-                        color: AppColors.borderSubtle,
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                        ),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: AppColors.gunmetal,
-                          ),
-                          children: [
-                            const TextSpan(text: 'Today is '),
-                            TextSpan(
-                              text: _tasks.isEmpty
-                                  ? '0% executed'
-                                  : '${((_tasks.where((t) => t.status == 'completed').length / _tasks.length) * 100).toInt()}% executed',
-                              style: TextStyle(
-                                color: AppColors.electric,
-                                fontWeight: FontWeight.w900,
-                              ),
+                        children: [
+                          const TextSpan(text: 'Today is '),
+                          TextSpan(
+                            text: _tasks.isEmpty
+                                ? '0% executed'
+                                : '${((_tasks.where((t) => t.status == 'completed').length / _tasks.length) * 100).toInt()}% executed',
+                            style: TextStyle(
+                              color: AppColors.electric,
+                              fontWeight: FontWeight.w900,
                             ),
-                          ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+
+                const SizedBox(height: 32),
+
+                // Stats Row/Grid
+                if (widget.isDesktop)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          title: 'ACTIVE FLOWS',
+                          value: _tasks
+                              .where((t) => t.status != 'completed')
+                              .length
+                              .toString(),
+                          subtitle: '4 running now',
+                          icon: LucideIcons.activity,
+                          color: AppColors.electric,
+                          delay: 0,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          title: 'TASKS PENDING',
+                          value: _tasks
+                              .where((t) => t.status == 'pending')
+                              .length
+                              .toString(),
+                          subtitle: '3 high priority',
+                          icon: LucideIcons.checkCircle,
+                          color: const Color(0xFF10B981),
+                          delay: 100,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          title: 'COMPLETED',
+                          value: _tasks
+                              .where((t) => t.status == 'completed')
+                              .length
+                              .toString(),
+                          subtitle: 'This week',
+                          icon: LucideIcons.zap,
+                          color: Colors.orangeAccent,
+                          delay: 200,
                         ),
                       ),
                     ],
-                  ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                  )
+                else
+                  SizedBox(
+                    height: 140,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      clipBehavior: Clip.none,
+                      children: [
+                        _buildStatCard(
+                          title: 'ACTIVE FLOWS',
+                          value: _tasks
+                              .where((t) => t.status != 'completed')
+                              .length
+                              .toString(),
+                          subtitle: '4 running now',
+                          icon: LucideIcons.activity,
+                          color: AppColors.electric,
+                          delay: 0,
+                          onTap: () => Navigator.push(
+                            context,
+                            GlassRoute(page: const FocusScreen()),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        _buildStatCard(
+                          title: 'CALENDAR',
+                          value: 'VIEW',
+                          subtitle: 'Schedule',
+                          icon: LucideIcons.calendar,
+                          color: const Color(0xFF10B981),
+                          delay: 100,
+                          onTap: () => Navigator.push(
+                            context,
+                            GlassRoute(page: const CalendarScreen()),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        _buildStatCard(
+                          title: 'COMPLETED',
+                          value: _tasks
+                              .where((t) => t.status == 'completed')
+                              .length
+                              .toString(),
+                          subtitle: 'This week',
+                          icon: LucideIcons.zap,
+                          color: Colors.orangeAccent,
+                          delay: 200,
+                        ),
+                      ],
+                    ),
+                  ),
 
-                  const SizedBox(height: 32),
+                const SizedBox(height: 48),
 
-                          // Stats Row/Grid
-                          if (widget.isDesktop)
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildStatCard(
-                                    title: 'ACTIVE FLOWS',
-                                    value: _tasks
-                                        .where((t) => t.status != 'completed')
-                                        .length
-                                        .toString(),
-                                    subtitle: '4 running now',
-                                    icon: LucideIcons.activity,
-                                    color: AppColors.electric,
-                                    delay: 0,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildStatCard(
-                                    title: 'TASKS PENDING',
-                                    value: _tasks
-                                        .where((t) => t.status == 'pending')
-                                        .length
-                                        .toString(),
-                                    subtitle: '3 high priority',
-                                    icon: LucideIcons.checkCircle,
-                                    color: const Color(0xFF10B981),
-                                    delay: 100,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildStatCard(
-                                    title: 'COMPLETED',
-                                    value: _tasks
-                                        .where((t) => t.status == 'completed')
-                                        .length
-                                        .toString(),
-                                    subtitle: 'This week',
-                                    icon: LucideIcons.zap,
-                                    color: Colors.orangeAccent,
-                                    delay: 200,
-                                  ),
-                                ),
-                              ],
-                            )
-                          else
-                            SizedBox(
-                              height: 140,
-                              child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                clipBehavior: Clip.none,
-                                children: [
-                                  _buildStatCard(
-                                    title: 'ACTIVE FLOWS',
-                                    value: _tasks
-                                        .where((t) => t.status != 'completed')
-                                        .length
-                                        .toString(),
-                                    subtitle: '4 running now',
-                                    icon: LucideIcons.activity,
-                                    color: AppColors.electric,
-                                    delay: 0,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      GlassRoute(page: const FocusScreen()),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  _buildStatCard(
-                                    title: 'CALENDAR',
-                                    value: 'VIEW',
-                                    subtitle: 'Schedule',
-                                    icon: LucideIcons.calendar,
-                                    color: const Color(0xFF10B981),
-                                    delay: 100,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      GlassRoute(page: const CalendarScreen()),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  _buildStatCard(
-                                    title: 'COMPLETED',
-                                    value: _tasks
-                                        .where((t) => t.status == 'completed')
-                                        .length
-                                        .toString(),
-                                    subtitle: 'This week',
-                                    icon: LucideIcons.zap,
-                                    color: Colors.orangeAccent,
-                                    delay: 200,
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          const SizedBox(height: 48),
-
-                          if (_isLoading)
-                            const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.electric,
-                              ),
-                            )
-                          else if (_tasks.isEmpty)
-                            Center(
+                if (_isLoading)
+                  const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.electric,
+                    ),
+                  )
+                else if (_tasks.isEmpty)
+                  Center(
+                    child: Column(
+                      children: [
+                        const Icon(
+                          LucideIcons.clipboardList,
+                          size: 48,
+                          color: AppColors.gunmetal,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No tasks found.',
+                          style: GoogleFonts.inter(
+                            color: AppColors.gunmetal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (widget.isDesktop)
+                        Row(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
                               child: Column(
                                 children: [
-                                  const Icon(
-                                    LucideIcons.clipboardList,
-                                    size: 48,
-                                    color: AppColors.gunmetal,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'No tasks found.',
-                                    style: GoogleFonts.inter(
-                                      color: AppColors.gunmetal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          else
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (widget.isDesktop)
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: Column(
-                                          children: [
-                                            _buildSectionHeader(
-                                              'CRITICAL TRACK',
-                                              LucideIcons.target,
-                                              const Color(0xFFFF4D4D),
-                                            ),
-                                            const SizedBox(height: 16),
-                                            ..._tasks.map(
-                                              (task) => _buildTaskItem(
-                                                task: task,
-                                                tag: task.priority
-                                                    .toUpperCase(),
-                                                tagColor:
-                                                    task.priority == 'high'
-                                                    ? const Color(0xFFFF4D4D)
-                                                    : AppColors.electric,
-                                                time: task.status.toUpperCase(),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 32),
-                                      Expanded(
-                                        child: _buildSystemPerformance(),
-                                      ),
-                                    ],
-                                  )
-                                else ...[
                                   _buildSectionHeader(
                                     'CRITICAL TRACK',
                                     LucideIcons.target,
@@ -327,29 +299,51 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
                                   ..._tasks.map(
                                     (task) => _buildTaskItem(
                                       task: task,
-                                      tag: task.priority.toUpperCase(),
-                                      tagColor: task.priority == 'high'
+                                      tag: task.priority
+                                          .toUpperCase(),
+                                      tagColor:
+                                          task.priority == 'high'
                                           ? const Color(0xFFFF4D4D)
                                           : AppColors.electric,
                                       time: task.status.toUpperCase(),
                                     ),
                                   ),
-                                  const SizedBox(height: 32),
-                                  _buildSystemPerformance(),
                                 ],
-                              ],
+                              ),
                             ),
-                        ],
-                      ),
-                    ),
+                            const SizedBox(width: 32),
+                            Expanded(
+                              child: _buildSystemPerformance(),
+                            ),
+                          ],
+                        )
+                      else ...[
+                        _buildSectionHeader(
+                          'CRITICAL TRACK',
+                          LucideIcons.target,
+                          const Color(0xFFFF4D4D),
+                        ),
+                        const SizedBox(height: 16),
+                        ..._tasks.map(
+                          (task) => _buildTaskItem(
+                            task: task,
+                            tag: task.priority.toUpperCase(),
+                            tagColor: task.priority == 'high'
+                                ? const Color(0xFFFF4D4D)
+                                : AppColors.electric,
+                            time: task.status.toUpperCase(),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        _buildSystemPerformance(),
+                      ],
+                    ],
                   ),
-                ),
               ],
             ),
           ),
-        ],
-      ),
-      floatingActionButton: widget.isDesktop ? null : _buildMobileFAB(context),
+        ),
+      ],
     );
   }
 
@@ -413,37 +407,6 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
         .animate()
         .fadeIn(duration: 600.ms, delay: 400.ms)
         .slideY(begin: 0.1, end: 0);
-  }
-
-  Widget _buildMobileFAB(BuildContext context) {
-    return Container(
-      height: 64,
-      width: 64,
-      decoration: BoxDecoration(
-        color: AppColors.electric,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.electric.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            GlassRoute(page: const CreateTaskScreen()),
-          );
-          _fetchTasks();
-        },
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        highlightElevation: 0,
-        child: const Icon(LucideIcons.zap, color: AppColors.voidBg, size: 28),
-      ),
-    );
   }
 
   Widget _buildStatCard({
@@ -654,37 +617,6 @@ class _WorkflowDashboardScreenState extends State<WorkflowDashboardScreen> {
           ),
         ),
       ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.05, end: 0),
-    );
-  }
-}
-
-class _DesktopHeaderAction extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isPrimary;
-
-  const _DesktopHeaderAction(this.icon, this.onTap, {this.isPrimary = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: isPrimary ? AppColors.electric : AppColors.surface,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isPrimary ? AppColors.electric : AppColors.borderSubtle,
-          ),
-        ),
-        child: Icon(
-          icon,
-          size: 16,
-          color: isPrimary ? AppColors.voidBg : AppColors.electric,
-        ),
-      ),
     );
   }
 }

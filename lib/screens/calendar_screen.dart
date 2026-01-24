@@ -55,68 +55,54 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.voidBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'CALENDAR',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 14,
-            fontWeight: FontWeight.w900,
-            color: AppColors.electric,
-            letterSpacing: 2,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(LucideIcons.chevronLeft, color: AppColors.titanium),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.plus, color: AppColors.electric),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                GlassRoute(page: const CreateEventScreen()),
-              );
-              _fetchData();
-            },
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.electric),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Your Schedule',
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.titanium,
+    return _isLoading
+        ? const Center(
+            child: CircularProgressIndicator(color: AppColors.electric),
+          )
+        : SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TIME DIMENSION',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.electric,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Your Schedule',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.titanium,
+                  ),
+                ).animate().fadeIn().slideY(begin: 0.1, end: 0),
+                const SizedBox(height: 32),
+                if (_events.isEmpty)
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 60),
+                        Icon(LucideIcons.calendar, size: 80, color: AppColors.gunmetal.withOpacity(0.2)),
+                        const SizedBox(height: 24),
+                        Text(
+                          'No events scheduled.',
+                          style: GoogleFonts.inter(color: AppColors.gunmetal),
+                        ),
+                      ],
                     ),
-                  ).animate().fadeIn().slideY(begin: 0.1, end: 0),
-                  const SizedBox(height: 24),
-                  if (_events.isEmpty)
-                    Center(
-                      child: Text(
-                        'No events scheduled.',
-                        style: GoogleFonts.inter(color: AppColors.gunmetal),
-                      ),
-                    )
-                  else
-                    ..._events.map((event) => _buildEventCard(event)),
-                ],
-              ),
+                  )
+                else
+                  ..._events.map((event) => _buildEventCard(event)),
+              ],
             ),
-    );
+          );
   }
 
   Widget _buildEventCard(Event event) {
